@@ -8,6 +8,7 @@ import org.liko.demo.json2cvs.model.Trades;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,9 @@ import java.util.stream.Collectors;
 public class Json2CvsTest {
     @Test
     public void test() throws IOException {
-        File file = new File("/Users/liko/project/github/LikoLi/json2cvs/src/test/resources/Order.json");
+        URL resource = this.getClass().getResource("/Order.json");
+        String path = resource.getPath();
+        File file = new File(path);
         FileReader reader = new FileReader(file);
         BufferedReader bf = new BufferedReader(reader);
         String collect = bf.lines().collect(Collectors.joining());
@@ -32,12 +35,11 @@ public class Json2CvsTest {
 
     private void write2Cvs(Order order) throws IOException {
         List<Trades> trades = order.getTrades();
-        writeList2Csv(trades, "/Users/liko/project/github/LikoLi/json2cvs/src/test/resources/trades.csv", getHeader(Trades.class));
-        writeList2Csv(trades.stream().map(Trades::getGoods_list).collect(Collectors.toList()).get(0), "/Users/liko/project/github/LikoLi/json2cvs/src/test/resources/goodsList.csv", getHeader(GoodsList.class));
+        writeList2Csv(trades, getFile("/trades.csv") ,getHeader(Trades.class));
+        writeList2Csv(trades.stream().map(Trades::getGoods_list).collect(Collectors.toList()).get(0), getFile("/goodsList.csv"), getHeader(GoodsList.class));
     }
 
-    private <T> void writeList2Csv(List<T> list, String path, String header) throws IOException {
-        File file = new File(path);
+    private <T> void writeList2Csv(List<T> list, File file, String header) throws IOException {
         FileWriter writer = new FileWriter(file);
         BufferedWriter bw = new BufferedWriter(writer);
         bw.write(header);
@@ -62,4 +64,10 @@ public class Json2CvsTest {
         return str.substring(0, str.length() - 1);
     }
 
+    private File getFile(String fileName) throws IOException {
+        String resource = this.getClass().getResource("/").getPath();
+        File file = new File(resource + fileName);
+        file.createNewFile();
+        return file;
+    }
 }
